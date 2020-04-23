@@ -19,7 +19,7 @@ import { ema } from "react-stockcharts/lib/indicator";
 import { fitWidth } from "react-stockcharts/lib/helper";
 import { last, hexToRGBA } from "react-stockcharts/lib/utils";
 
-const dateFormat = timeFormat("%Y-%m-%d");
+const dateFormat = timeFormat("%A, %b %d, %Y");
 const numberFormat = format(".2f");
 
 function tooltipContent(ys) {
@@ -34,6 +34,27 @@ function tooltipContent(ys) {
       ].filter(line => line.value)
     };
   };
+}
+
+const X = 10;
+const Y = 7.5;
+
+function tooltipCanvas({ fontFamily, fontSize, fontFill }, content, ctx) {
+  const startY = Y + fontSize * 0.9;
+  ctx.font = `${fontSize}px ${fontFamily}`;
+  ctx.fillStyle = fontFill;
+  ctx.textAlign = "left";
+  ctx.fillText(content.x, X, startY);
+
+  for (var i = 0; i < content.y.length; i++) {
+    let y = content.y[i];
+    let textY = startY + fontSize * (i + 1) + (i + 1) * 5;
+    ctx.fillStyle = y.stroke || fontFill;
+    ctx.fillText(y.label, X, textY);
+
+    ctx.fillStyle = fontFill;
+    ctx.fillText(": " + y.value, X + ctx.measureText(y.label).width, textY);
+  }
 }
 
 /**
@@ -198,8 +219,9 @@ class CandleStickChartWithHoverTooltip extends React.Component {
             bgOpacity="0.3"
             yAccessor={ema50.accessor()}
             tooltipContent={tooltipContent()}
-            fontSize={15}
+            fontSize={13}
             backgroundShapeCanvas={backgroundShapeCanvas}
+            tooltipCanvas={tooltipCanvas}
           />
         </Chart>
         <Chart
